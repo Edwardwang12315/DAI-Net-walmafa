@@ -1,139 +1,175 @@
-<p align="center">
-  <h1 align="center">Boosting Object Detection with Zero-Shot Day-Night Domain Adaptation
-</h1>
-  <p align="center">
-    <a href="https://zpdu.github.io/">Zhipeng Du</a>
-    ·
-    <a href="https://sites.google.com/site/miaojingshi/home">Miaojing Shi</a>
-    ·
-    <a href="https://jiankangdeng.github.io/">Jiankang Deng</a>
-  </p>
-  
+
+## Wavelet-based Mamba with Fourier Adjustment for Low-light Image Enhancement(WalMaFa)
 
 
-PyTorch implementation of **Boosting Object Detection with Zero-Shot Day-Night Domain Adaptation**. (CVPR 2024) [[Page](https://zpdu.github.io/DAINet_page/) | [Paper](https://arxiv.org/abs/2312.01220)]
+Junhao Tan, Songwen Pei, Wei Qin, Bo Fu, Ximing Li and Libo Huang
 
-![overview](./assets/overview.png)
+[![arXiv](https://img.shields.io/badge/arxiv-paper-179bd3)](https://arxiv.org/abs/2410.20314)
+
+>**Abstract:** Frequency information (e.g., Discrete Wavelet Transform and Fast Fourier Transform) has been widely applied to solve the issue of Low-Light Image Enhancement (LLIE). However, existing frequency-based models primarily operate in the simple wavelet or Fourier space of images, which lacks utilization of valid global and local information in each space. We found that wavelet frequency information is more sensitive to global brightness due to its low-frequency component while Fourier frequency information is more sensitive to local details due to its phase component. In order to achieve superior preliminary brightness enhancement by optimally integrating spatial channel information with low-frequency components in the wavelet transform, we introduce channel-wise Mamba, which compensates for the long-range dependencies of CNNs and has lower complexity compared to Diffusion and Transformer models. So in this work, we propose a novel Wavelet-based Mamba with Fourier Adjustment model called **WalMaFa**, consisting of a Wavelet-based Mamba Block (WMB) and a Fast Fourier Adjustment Block (FFAB). We employ an Encoder-Latent-Decoder structure to accomplish the end-to-end transformation. Specifically, WMB is adopted in the Encoder and Decoder to enhance global brightness while FFAB is adopted in the Latent to fine-tune local texture details and alleviate ambiguity. Extensive experiments demonstrate that our proposed WalMaFa achieves state-of-the-art performance with fewer computational resources and faster speed.
+
+#### News
+- **Sep 21, 2024:** Our paper has been accepted by ACCV 2024! :boom: :boom: :boom:
+- **Jun 8, 2024:** Pre-trained models are released!
+- **Jun 8, 2024:** Codes is released!
+- **Jun 8, 2024:** Homepage is released!
 
 
 
-## 🔨 To-Do List
+![](figures/cover.png)
 
-1. - [x] release the code regarding the proposed model and losses.
-3. - [x] release the evaluation code, and the pretrained models.
+## Network Architecture
+![](figures/network.png)
 
-3. - [x] release the training code.
+The overview of the WalMaFa architecture. Our model consists of an Encoder-Latent-Decoder structure that uses wavelet-based WMB to adjust global brightness during the Encoder and Decoder, and Fourier-based FFAB to adjust local details during the Latent.
 
-## :rocket: Installation
+## Module Design
+![](figures/module.png)
+## Qualitative results
+### Results on LOL datasets
 
-Begin by cloning the repository and setting up the environment:
+![](figures/LOL_experiment.png)
 
-```
-git clone https://github.com/ZPDu/DAI-Net.git
-cd DAI-Net
+### Results on non-reference datasets
+![](figures/unpaired.png)
 
-conda create -y -n dainet python=3.7
-conda activate dainet
 
-pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
 
-pip install -r requirements.txt
-```
 
-## :notebook_with_decorative_cover: Training
+## Get Started
+### Dependencies and Installation
+1. Create Conda Environment 
+```bash
+conda create -n WalMaFa python=3.10
+conda activate WalMaFa
 
-#### Data and Weight Preparation
+# 进入到libfile文件夹
+cd libfile
+下载文件：https://pan.baidu.com/s/1Pagb5RrYiC84JAyyEh_sPg?pwd=phfe
+pip install torch-2.3.1+cu118-cp310-cp310-linux_x86_64.whl 
+pip install torchvision-0.18.1+cu118-cp310-cp310-linux_x86_64.whl 
+pip install torchaudio-2.3.1+cu118-cp310-cp310-linux_x86_64.whl
 
-- Download the WIDER Face Training & Validation images at [WIDER FACE](http://shuoyang1213.me/WIDERFACE/).
-- Obtain the annotations of [training set](https://github.com/daooshee/HLA-Face-Code/blob/main/train_code/dataset/wider_face_train.txt) and [validation set](https://github.com/daooshee/HLA-Face-Code/blob/main/train_code/dataset/wider_face_val.txt).
-- Download the [pretrained weight](https://drive.google.com/file/d/1MaRK-VZmjBvkm79E1G77vFccb_9GWrfG/view?usp=drive_link) of Retinex Decomposition Net.
-- Prepare the [pretrained weight](https://drive.google.com/file/d/1whV71K42YYduOPjTTljBL8CB-Qs4Np6U/view?usp=drive_link) of the base network.
+pip install triton==2.3.1
+pip install transformers==4.43.3
 
-Organize the folders as:
+conda install -c "nvidia/label/cuda-11.8.0" cuda-nvcc
 
-```
-.
-├── utils
-├── weights
-│   ├── decomp.pth
-│   ├── vgg16_reducedfc.pth
-├── dataset
-│   ├── wider_face_train.txt
-│   ├── wider_face_val.txt
-│   ├── WiderFace
-│   │   ├── WIDER_train
-│   │   └── WIDER_val
-```
+pip install causal_conv1d-1.4.0+cu118torch2.3cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+pip install mamba_ssm-2.2.2+cu118torch2.3cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 
-#### Model Training
-
-To train the model, run
-
-```
-python -m torch.distributed.launch --nproc_per_node=$NUM_OF_GPUS$ train.py
+git clone https://github.com/luo3300612/Visualizer.git
+cd Visualizer
+pip install bytecode
+python setup.py install
+    
+pip install matplotlib scikit-image opencv-python yacs joblib natsort h5py tqdm einops tensorboard pyyaml pytorch-msssim warmup_scheduler tensorboardX easydict torchmetrics
 ```
 
-## :notebook: Evaluation​
+以下不需要执行
+```bash
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install cudatoolkit==11.7 -c nvidia
+conda install -c "nvidia/label/cuda-11.7.0" cuda-nvcc
+conda install packaging
 
-On Dark Face:
+cudnn安装：(不需要操作)
+    conda search cudnn
+    conda install cudnn=8.9.2
+    conda list | grep -E "cudatoolkit|cudnn" #查看cudnn版本
+    cat /usr/lib/cuda/include/cudnn_version.h | grep CUDNN_MAJOR -A 2 #查看cudnn安装版本
 
-- Download the testing samples from [UG2+ Challenge](https://codalab.lisn.upsaclay.fr/competitions/8494?secret_key=cae604ef-4bd6-4b3d-88d9-2df85f91ea1c).
-- Download the checkpoints: [DarkFaceZSDA](https://drive.google.com/file/d/1BdkYLGo7PExJEMFEjh28OeLP4U1Zyx30/view?usp=drive_link) (28.0) or [DarkFaceFS](https://drive.google.com/file/d/1ykiyAaZPl-mQDg_lAclDktAJVi-WqQaC/view?usp=drive_link) (52.9, finetuned with full supervision).
-- Set (1) the paths of testing samples & checkpoint, (2) whether to use a multi-scale strategy, and run test.py.
-- Submit the results for benchmarking. ([Detailed instructions](https://codalab.lisn.upsaclay.fr/competitions/8494?secret_key=cae604ef-4bd6-4b3d-88d9-2df85f91ea1c)).
+设置 CUDA_HOME 为 Conda 环境的 CUDA 路径
+export CUDA_HOME=$CONDA_PREFIX
+将 CUDA 库路径添加到动态链接库搜索路径
+export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
 
-On ExDark:
+gcc版本切换方法：(GCC版本冲突时使用)
+    gcc -v #查看gcc版本
+    ls /usr/bin/gcc* #查看已安装gcc文件
+    sudo update-alternatives --config gcc #切换gcc
 
-- Our experiments are based on the codebase of [MAET](https://github.com/cuiziteng/ICCV_MAET). You only need to replace the checkpoint with [ours](https://drive.google.com/file/d/1g74-aRdQP0kkUe4OXnRZCHKqNgQILA6r/view?usp=drive_link) for evaluation.
+visualizer安装方法： 
+    pip uninstall visualizer
+    git clone https://github.com/luo3300612/Visualizer.git
+    cd Visualizer
+    pip install bytecode
+    python setup.py install
 
-# 调试记录
-## 2025.1.22
-- test输出只有预测txt文件，补充了把预测框绘制出来的步骤
-- 简单筛选了一下，置信度小于0.3的不显示，效果很好
-- 以上测试用的是作者提供的权重文件，只适用于人脸检测
-- _C.TOP_K = 20时，mAP=14.19
-- _C.TOP_K = 750时，mAP=14.21
+mamba_ssm安装方法：
+    git clone https://github.com/Dao-AILab/causal-conv1d.git 
+    cd causal-conv1d 
+    git checkout v1.2.0 # current latest version tag 
+    CAUSAL_CONV1D_FORCE_BUILD=TRUE pip install .
+    cd ..
+    git clone https://github.com/state-spaces/mamba.git
+    cd ./mamba
+    git checkout v1.2.0 # current latest version tag
+    MAMBA_FORCE_BUILD=TRUE pip install .
 
-## 2025.4.10
-- 完美收敛的结果应该是
-- ->> pal1 conf loss:1.4184 || pal1 loc loss:0.6319
-- ->> pal2 conf loss:1.1226 || pal2 loc loss:0.8053
-- ->> mutual loss:0.0051 || enhanced loss:0.0348
-- 训练的结果还有一段距离
-- ->> pal1 conf loss:1.3814 || pal1 loc loss:2.4703
-- ->> pal2 conf loss:2.0561 || pal2 loc loss:2.3194
-- ->> mutual loss:0.0049 || enhanced loss:0.0627
-
+```
+2. Clone Repo
+```
+git clone https://github.com/mcpaulgeorge/WalMaFa.git
+```
 
 
-## 📑 Citation
+### Pretrained Model
+We provide the pre-trained models:
+- WalMaFa trained on LOL [[Google drive](https://drive.google.com/drive/folders/1wEVqm5Z9tKCLqN6SAEYwetQMk-ViCCSz?usp=sharing) | [Baidu drive](https://pan.baidu.com/s/1j5KwGHWxMsaPwHP2u5Vj7A?pwd=5zyt)]
 
-If you find this work useful, please cite
 
-``` citation
-@inproceedings{du2024boosting,
-  title={Boosting Object Detection with Zero-Shot Day-Night Domain Adaptation},
-  author={Du, Zhipeng and Shi, Miaojing and Deng, Jiankang},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={12666--12676},
-  year={2024}
+
+
+### Test
+You can directly test the pre-trained model as follows
+
+1. Modify the paths to dataset and pre-trained mode. 
+```python
+# Tesing parameter 
+input_dir # the path of data
+result_dir # the save path of results 
+weights # the weight path of the pre-trained model
+```
+
+2. Test the models for LOL dataset
+
+You need to specify the data path ```input_dir```, ```result_dir```, and model path ```weight_path```. Then run
+```bash
+python test.py --input_dir your_data_path --result_dir your_save_path --weights weight_path
+
+```
+
+### Train
+
+1. To download datasets training and testing data
+
+2.  To train WalMaFa, run
+```bash
+python train.py -yml_path your_config_path
+```
+
+
+### Reference Repositories
+This implementation is based on / inspired by:
+- LLFormer: https://github.com/TaoWangzj/LLFormer
+- RetinexFormer: https://github.com/caiyuanhao1998/Retinexformer
+- SNR: https://github.com/dvlab-research/SNR-Aware-Low-Light-Enhance
+- IAT: https://github.com/cuiziteng/Illumination-Adaptive-Transformer
+
+### Citation
+If you find WalMaFa helpful, please cite our paper:
+```
+@InProceedings{Tan_2024_ACCV,
+    author    = {Tan, Junhao and Pei, Songwen and Qin, Wei and Fu, Bo and Li, Ximing and Huang, Libo},
+    title     = {Wavelet-based Mamba with Fourier Adjustment for Low-light Image Enhancement},
+    booktitle = {Proceedings of the Asian Conference on Computer Vision (ACCV)},
+    month     = {December},
+    year      = {2024},
+    pages     = {3449-3464}
 }
 ```
-
-or
-
-``` citation
-@article{du2023boosting,
-  title={Boosting Object Detection with Zero-Shot Day-Night Domain Adaptation},
-  author={Du, Zhipeng and Shi, Miaojing and Deng, Jiankang},
-  journal={arXiv preprint arXiv:2312.01220},
-  year={2023}
-}
-```
+---
 
 
-
-## 🔎 Acknowledgement
-
-We thank [DSFD.pytorch](https://github.com/yxlijun/DSFD.pytorch), [RetinexNet_PyTorch](https://github.com/aasharma90/RetinexNet_PyTorch), [MAET](https://github.com/cuiziteng/ICCV_MAET), [HLA-Face](https://github.com/daooshee/HLA-Face-Code) for their amazing works!
 
